@@ -4,6 +4,8 @@ from PyPDFForm import PdfWrapper
 import json
 from PyPDFForm import PdfWrapper, FormWrapper
 import encodings
+from datetime import datetime
+
 
 path = 'anah_mpra_attestation_travaux.pdf'
 path_out = 'out.pdf'
@@ -19,8 +21,9 @@ pdf_form_schema = PdfWrapper(path).schema
 for k,v in pdf_form_schema["properties"].items():
     print(f"{k} : {v['type']}")
     # print(f"{k}")
-
-
+now = datetime.now()
+string = now.strftime('%y%m%d %H:%M:%S')
+print(string)
 # filled = FormWrapper(path).fill(
 #     {
 #         "Nom Prénom": "DU PELOUX, Lionel",

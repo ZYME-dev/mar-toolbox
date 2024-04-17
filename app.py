@@ -17,23 +17,7 @@ data = None
 path = 'anah_mpra_attestation_travaux.pdf'
 path_out = 'out.pdf'
 
-def generate_pdf(repfn):
-    with open(repfn, 'w') as f:
-        f.write('Report')
-    st.write('done report generation')
-
-def export_pdf():
-
-    data = form.get_filling_dict()
-    filled = FormWrapper(path).fill(data,flatten=False)
-    with open(path_out, "wb+") as output:
-        output.write(filled.read())
-        
-
-
 st.title('Dossier MPRA')
-
-st.button("export", on_click=export_pdf)
 
 with st.container():
     st.header("1. Identité du demandeur", divider=True)
@@ -182,16 +166,18 @@ with st.container():
 
 with st.sidebar:
 
-    b = st.button("generate")
+    st.write("générer l'attestation :")
+    b = st.button("Générer")
 
     if b:
-        
         data = form.get_filling_dict()
         filled = FormWrapper(path).fill(data,flatten=False).read()
         
+        stamp = datetime.now().strftime("%y%m%d")
+        fname = f'mpra_attestation_travaux_{stamp}.pdf'
         st.download_button(
-            label="Download Report",
+            label="Télécharger",
             data=filled,
-            file_name='att.pdf',
+            file_name=fname,
             mime='application/octet-stream',
         )
