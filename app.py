@@ -167,6 +167,7 @@ with st.container():
 with st.sidebar:
 
     st.write("générer l'attestation :")
+    # st.file_uploader("uploader un template")
     b = st.button("Générer")
 
     if b:
