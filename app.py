@@ -3,42 +3,37 @@ import pandas as pd
 import numpy as np
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from fillpdf import fillpdfs
 from datetime import datetime
+from models import Form_AttestationTravauxMPRA
+from PyPDFForm import PdfWrapper, FormWrapper
+from datetime import date
+from fillpdf import fillpdfs
+from io import StringIO, BytesIO
 
-# streamlit run app.py
 
+form = Form_AttestationTravauxMPRA()
+data = None
 
-class MPRA_AttestationTravaux(BaseModel):
+path = 'anah_mpra_attestation_travaux.pdf'
+path_out = 'out.pdf'
 
-    first_name  : str = Field(default='', alias="Prénom")
-    last_name   : str = Field(default='', alias="Nom")
-    full_name   : str = Field(default='', alias="Nom Prénom")
-
-    address_street_number : str = Field(default='', alias="n°")
-    address_street_name   : str = Field(default='', alias="Voie")
-    address_city_code     : str = Field(default='', alias="Code postal")
-    address_city_name     : str = Field(default='', alias="Ville")
-
-    total_amounts_ht  : int = Field(default=0, alias="cout euro HT")
-    total_amounts_ttc : int = Field(default=0, alias="cout TTC")
-    
-
-data = MPRA_AttestationTravaux()
+def generate_pdf(repfn):
+    with open(repfn, 'w') as f:
+        f.write('Report')
+    st.write('done report generation')
 
 def export_pdf():
 
-    path = 'mpra_attestation_travaux.pdf'
-    path_out = 'out.pdf'
-    model = data.model_dump(by_alias=True)
-    print(model)
-
-    fillpdfs.write_fillable_pdf(path, path_out, model)
+    data = form.get_filling_dict()
+    filled = FormWrapper(path).fill(data,flatten=False)
+    with open(path_out, "wb+") as output:
+        output.write(filled.read())
+        
 
 
 st.title('Dossier MPRA')
 
-
+st.button("export", on_click=export_pdf)
 
 with st.container():
     st.header("1. Identité du demandeur", divider=True)
@@ -48,44 +43,36 @@ with st.container():
     full_name = f"{last_name.upper()}, {first_name}"
     if first_name != "" and last_name != "" : st.text(full_name)
 
-    data.last_name = last_name
-    data.first_name = first_name
-    data.full_name = full_name
-
-st.button("export", on_click=export_pdf)
+    form.demandeur_nom_prenom = full_name
 
 with st.container():
     st.header("2. Adresse du chantier", divider=True)
     col1, col2 = st.columns([1, 3])
-    address_street_number = col1.text_input("N°")
-    address_street_name = col2.text_input("Voie")
+    form.adresse_chantier_num = col1.text_input("N°")
+    form.adresse_chantier_voie = col2.text_input("Voie")
     col1, col2 = st.columns([1, 3])
-    address_city_code = col1.text_input("Code Postal")
-    address_city_name = col2.text_input("Ville")
-
-    data.address_street_number = address_street_number
-    data.address_street_name = address_street_name
-    data.address_city_code = address_city_code
-    data.address_city_name = address_city_name
+    form.adresse_chantier_codepostal = col1.text_input("Code Postal")
+    form.adresse_chantier_ville = col2.text_input("Ville")
 
 with st.container():
     st.header("3. Synthèse des travaux éligibles", divider=True)
     col1, col2 = st.columns(2)
-    total_amounts_ht = col1.number_input('Coût total des travaux éligibles (€ HT)', value=0, min_value=0)
-    total_amounts_ttc = col2.number_input('Coût total des travaux éligible (€ TTC)', value=0, min_value=0)
-    data.total_amounts_ht = total_amounts_ht
-    data.total_amounts_ttc = total_amounts_ttc
+    form.cout_total_travaux_elligibles_ht = col1.number_input('Coût total des travaux éligibles (€ HT)', value=0, min_value=0)
+    form.cout_total_travaux_elligibles_ttc = col2.number_input('Coût total des travaux éligible (€ TTC)', value=0, min_value=0)
 
 with st.container():
     st.header("4. Synthèse de l’audit énergétique", divider=True)
     col1, col2 = st.columns(2)
     audit_date = col1.date_input("Date de réalisation de l'audit énergétique", datetime.now(), format="DD/MM/YYYY") 
-    audit_id = col2.text_input("Identifiant de l’audit énergétique (n°)")
+    form.audit_id = col2.text_input("Identifiant de l’audit énergétique (n°)")
     col1, col2 = st.columns(2)
-    audit_company_name = col1.text_input("Raison Sociale")
-    audit_company_siret = col2.text_input("Siret (14 chiffres)", max_chars=14)
+    form.audit_professionnel_raison = col1.text_input("Raison Sociale")
+    form.audit_professionnel_siret = col2.text_input("Siret (14 chiffres)", max_chars=14)
 
-    
+    form.audit_date_jour = audit_date.day
+    form.audit_date_mois = audit_date.month
+    form.audit_date_annee = audit_date.year
+
     def situation(key_id):
         st.write("Consommation conventionnelle (chauffage, refroidissement, production d'eau chaude sanitaire, éclairage, auxiliaires)")
         with st.expander("Calculette EP > EF"):
@@ -136,15 +123,36 @@ with st.container():
     
     st.subheader("Situation initiale du logement (« avant travaux »)")
     si = situation("SI_")
+    form.etat_initial_ep = si[0]
+    form.etat_initial_ef = si[1]
+    form.etat_initial_ges = si[2]
+    form.etat_initial_dpe = si[3]
+    form.etat_initial_shab = si[4]
 
     st.subheader("Situation du logement projetée dans le scénario de travaux retenu (« après travaux »)")
     sf = situation("SF_")
+    form.etat_final_ep = sf[0]
+    form.etat_final_ef = sf[1]
+    form.etat_final_ges = sf[2]
+    form.etat_final_dpe = sf[3]
+    form.etat_final_shab = sf[4]
 
     st.subheader("Gain de classes de performance énergétique associé au projet de travaux :")
 
-    dpe_jump = ord(si[3])-ord(sf[3])
+    dpe_jump = int(ord(si[3])-ord(sf[3]))
     if dpe_jump < 2 : st.error(f"Le nombre de sauts de classe est seulement de : {dpe_jump} < 2")
     else: st.success(f"Le nombre de sauts de classe est de : {dpe_jump}")
+
+    form.gain_classe_2 = False
+    form.gain_classe_3 = False
+    form.gain_classe_4 = False
+
+    if dpe_jump == 2:
+        form.gain_classe_2 = True
+    elif dpe_jump == 3:
+        form.gain_classe_3 = True
+    elif dpe_jump > 3:
+        form.gain_classe_4 = True
 
 with st.container():
     st.header("5. Description des travaux éligibles", divider=True)
@@ -154,9 +162,36 @@ with st.container():
         with st.expander(f"Poste de Travaux N° {row}"):
             # if row > 1 : st.divider()
             cols = st.columns(col_size)
-            cols[0].text_input("Quantité", key=f"A{row}", placeholder="100 m²")
-            cols[1].text_input("Résistance", key=f"B{row}", placeholder="3.5 W/m².K")
-            cols[2].number_input("Montant HT", key=f"C{row}", placeholder=1000, min_value=0)
-            cols[3].number_input("Montant TTC",key=f"D{row}", placeholder=1200, min_value=0)
-            st.text_input("", key=f"E{row}", placeholder="Isolation thermique par l’extérieur des murs avec de la laine de bois")
+            q = cols[0].text_input("Quantité", key=f"A{row}", placeholder="100 m²")
+            r = cols[1].text_input("Résistance", key=f"B{row}", placeholder="3.5 W/m².K")
+            ht = cols[2].number_input("Montant HT", key=f"C{row}", placeholder=1000, min_value=0)
+            ttc = cols[3].number_input("Montant TTC",key=f"D{row}", placeholder=1200, min_value=0)
+            description = st.text_input("Description du poste", key=f"E{row}", placeholder="Isolation thermique par l’extérieur des murs avec de la laine de bois")
+
+            if q != "" : description += "\n" + f"Quantité : {q}"
+            if r != "" : description += "\n" + f"Resistance : {r}"
+
+            if description != "":
+                setattr(form, f'poste_{row}_description', description)
+
+            if ht != 0 and ttc != 0:
+                m_ht =  f"{ht}".rjust(6, " ")  + "€ HT "
+                m_ttc = f"{ttc}".rjust(6, " ") + "€ TTC"
+                setattr(form, f'poste_{row}_cout_ht_ttc', f"{m_ht}\n{m_ttc}")
+    
+
+with st.sidebar:
+
+    b = st.button("generate")
+
+    if b:
         
+        data = form.get_filling_dict()
+        filled = FormWrapper(path).fill(data,flatten=False).read()
+        
+        st.download_button(
+            label="Download Report",
+            data=filled,
+            file_name='att.pdf',
+            mime='application/octet-stream',
+        )
