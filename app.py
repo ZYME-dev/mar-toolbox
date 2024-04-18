@@ -69,6 +69,10 @@ with st.container():
 
     def situation(key_id):
         st.write("Consommation conventionnelle (chauffage, refroidissement, production d'eau chaude sanitaire, éclairage, auxiliaires)")
+        col1, col2, col3 = st.columns(3)
+        shab = col1.number_input("Surface logement (m²)", key=key_id+"shab", value=100, min_value=0)
+        dpe = col2.selectbox("Etiquette DPE", key=key_id+"dpe", options=['A', 'B', 'C', 'D', 'E', 'F', 'G'], index=6)
+        ges_total = col3.number_input("GES (kgCO2eq/m²/an)", key=key_id+"ges_total", value=0, min_value=0)
         with st.expander("Calculette EP > EF"):
             cols = st.columns(7)
             cols[0].write("Energie Primaire")
@@ -105,13 +109,8 @@ with st.container():
             ef_sum = cols[6].number_input("Total EF", key=key_id+"ef_sum", value=sum(ef), min_value=0)
         
         col1, col2, col3 = st.columns(3)
-        ep_total = col1.number_input("Energie Primaire (kWh/m²/an)", key=key_id+"ep_total", value=ep_sum, min_value=0)
-        ef_total = col2.number_input("Energie Finale (kWh/m²/an)", key=key_id+"ef_total", value=ef_sum, min_value=0)
-        ges_total = col3.number_input("Émissions GES (kgCO2eq/m²/an)", key=key_id+"ges_total", value=0, min_value=0)
-
-        col1, col2, col3 = st.columns(3)
-        dpe = col2.selectbox("Etiquette", key=key_id+"dpe", options=['A', 'B', 'C', 'D', 'E', 'F', 'G'], index=6)
-        shab = col3.number_input("Surface de référence du logement (m²)", key=key_id+"shab", value=100, min_value=0)
+        ep_total = col1.number_input("Energie Primaire (kWh/m²/an)", key=key_id+"ep_total", value=int(ep_sum/shab), min_value=0)
+        ef_total = col2.number_input("Energie Finale (kWh/m²/an)", key=key_id+"ef_total", value=int(ef_sum/shab), min_value=0)
         
         return (ep_total, ef_total, ges_total, dpe, shab)
     
