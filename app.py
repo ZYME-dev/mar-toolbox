@@ -53,9 +53,9 @@ with st.container():
     form.audit_professionnel_raison = col1.text_input("Raison Sociale")
     form.audit_professionnel_siret = col2.text_input("Siret (14 chiffres)", max_chars=14)
 
-    form.audit_date_jour = audit_date.day
-    form.audit_date_mois = audit_date.month
-    form.audit_date_annee = audit_date.year
+    form.audit_date_jour = audit_date.day.format("{:.2d}")
+    form.audit_date_mois = audit_date.month.format("{:.2d}")
+    form.audit_date_annee = audit_date.year.format("{:.4d}")
 
     def situation(key_id):
         st.write("Consommation conventionnelle (chauffage, refroidissement, production d'eau chaude sanitaire, éclairage, auxiliaires)")
