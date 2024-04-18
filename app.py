@@ -213,3 +213,6 @@ with st.sidebar:
             file_name=fname,
             mime='application/octet-stream',
         )
+
+st.json(st.query_params.to_dict())
+
