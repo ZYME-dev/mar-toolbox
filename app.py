@@ -11,6 +11,15 @@ from fillpdf import fillpdfs
 from io import StringIO, BytesIO
 
 
+from streamlit_url_fragment import get_fragment
+import urllib
+fragment = get_fragment()
+st.write(fragment)
+# if fragment:
+#     params = dict(urllib.parse.parse_qsl(fragment.removeprefix('#')))
+#     st.json(params)
+
+
 form = Form_AttestationTravauxMPRA()
 data = None
 
@@ -214,5 +223,5 @@ with st.sidebar:
             mime='application/octet-stream',
         )
 
-st.json(st.query_params.to_dict())
+
 
