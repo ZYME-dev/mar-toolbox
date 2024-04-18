@@ -187,8 +187,8 @@ with st.container():
     emandeur_nom_prenom = col2.text_input("NOM, Prénom de l'**Accompagnateur**", key="accompagnateur_nom_prenom")
     accompagnateur_lieu = col2.text_input("Fait à", key="accompagnateur_lieu")
     accompagnateur_date = col2.date_input("Le",  key="accompagnateur_date", value=demandeur_date, format="DD/MM/YYYY") 
-    col2.text_input("Raison Sociale", key="rasison_2", value=form.audit_professionnel_raison, disabled=True, help="Remplir ce champ à la section 4")
-    col2.text_input("Siret (14 chiffres)", key="siret_2", value=form.audit_professionnel_siret, disabled=True, help="Remplir ce champ à la section 4")
+    accompagnateur_raison = col2.text_input("Raison Sociale", key="rasison_2", value=form.audit_professionnel_raison, disabled=False, help="Remplir ce champ à la section 4")
+    accompagnateur_siret = col2.text_input("Siret (14 chiffres)", key="siret_2", value=form.audit_professionnel_siret, max_chars=14, disabled=False, help="Remplir ce champ à la section 4")
 
 
     # col1.subheader("Demandeur")
