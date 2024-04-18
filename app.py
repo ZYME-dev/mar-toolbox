@@ -53,9 +53,9 @@ with st.container():
     form.audit_professionnel_raison = col1.text_input("Raison Sociale")
     form.audit_professionnel_siret = col2.text_input("Siret (14 chiffres)", max_chars=14)
 
-    form.audit_date_jour = audit_date.day.format("{:.2d}")
-    form.audit_date_mois = audit_date.month.format("{:.2d}")
-    form.audit_date_annee = audit_date.year.format("{:.4d}")
+    form.audit_date_jour = f"{audit_date.day:02d}"
+    form.audit_date_mois = f"{audit_date.month:02d}"
+    form.audit_date_annee = f"{audit_date.year:04d}"
 
     def situation(key_id):
         st.write("Consommation conventionnelle (chauffage, refroidissement, production d'eau chaude sanitaire, éclairage, auxiliaires)")
@@ -105,7 +105,7 @@ with st.container():
         
         return (ep_total, ef_total, ges_total, dpe, shab)
     
-    st.subheader("Situation initiale du logement (« avant travaux »)")
+    st.subheader("`Situation initiale du logement (« avant travaux »)`")
     si = situation("SI_")
     form.etat_initial_ep = si[0]
     form.etat_initial_ef = si[1]
@@ -113,7 +113,7 @@ with st.container():
     form.etat_initial_dpe = si[3]
     form.etat_initial_shab = si[4]
 
-    st.subheader("Situation du logement projetée dans le scénario de travaux retenu (« après travaux »)")
+    st.subheader("`Situation projetée du logement (« après travaux »)`")
     sf = situation("SF_")
     form.etat_final_ep = sf[0]
     form.etat_final_ef = sf[1]
@@ -121,11 +121,20 @@ with st.container():
     form.etat_final_dpe = sf[3]
     form.etat_final_shab = sf[4]
 
-    st.subheader("Gain de classes de performance énergétique associé au projet de travaux :")
 
     dpe_jump = int(ord(si[3])-ord(sf[3]))
+    st.subheader(f"`Gain de classes DPE associé au projet de travaux` :  `{dpe_jump}`")
+
     if dpe_jump < 2 : st.error(f"Le nombre de sauts de classe est seulement de : {dpe_jump} < 2")
     else: st.success(f"Le nombre de sauts de classe est de : {dpe_jump}")
+
+    if sf[3] in ['F', 'G']:
+        st.warning(f"La classe d'arrivée **{sf[3]}** ne permet pas de sortir du statut de **passoire énergétique**") 
+    
+    if sf[3] in ['E', 'F', 'G']:
+        st.warning(f"La classe d'arrivée **{sf[3]}** ne permet pas d'obtenir la **majoration** de 10%") 
+    
+    
 
     form.gain_classe_2 = False
     form.gain_classe_3 = False
@@ -163,11 +172,33 @@ with st.container():
                 m_ttc = f"{ttc}".rjust(6, " ") + "€ TTC"
                 setattr(form, f'poste_{row}_cout_ht_ttc', f"{m_ht}\n{m_ttc}")
     
+with st.container():
+
+    st.header("6. Demande de dérogation", divider=True)
+    st.subheader("aux critères de résistance thermique, de coefficient de transmission thermique ou de facteur de transmission solaire")
+
+with st.container():
+    st.header("Engagements", divider=True)
+    col1, col2 = st.columns(2)
+    demandeur_nom_prenom = col1.text_input("NOM, Prénom du **Demandeur**", key="demandeur_nom_prenom", value=full_name)
+    demandeur_lieu = col1.text_input("Fait à", key="demandeur_lieu")
+    demandeur_date = col1.date_input("Le", key="demandeur_date", value=datetime.now(), format="DD/MM/YYYY") 
+
+    emandeur_nom_prenom = col2.text_input("NOM, Prénom de l'**Accompagnateur**", key="accompagnateur_nom_prenom")
+    accompagnateur_lieu = col2.text_input("Fait à", key="accompagnateur_lieu")
+    accompagnateur_date = col2.date_input("Le",  key="accompagnateur_date", value=demandeur_date, format="DD/MM/YYYY") 
+    col2.text_input("Raison Sociale", key="rasison_2", value=form.audit_professionnel_raison, disabled=True, help="Remplir ce champ à la section 4")
+    col2.text_input("Siret (14 chiffres)", key="siret_2", value=form.audit_professionnel_siret, disabled=True, help="Remplir ce champ à la section 4")
+
+
+    # col1.subheader("Demandeur")
+    # st.write("générer l'attestation :")
+    # st.file_uploader("uploader un template")
+
 
 with st.sidebar:
 
-    st.write("générer l'attestation :")
-    # st.file_uploader("uploader un template")
+
     b = st.button("Générer")
 
     if b:

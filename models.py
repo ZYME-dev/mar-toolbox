@@ -43,9 +43,9 @@ class Form_AttestationTravauxMPRA(BaseModel):
     adresse_chantier_ville     : Optional[str] = Field(default=None, serialization_alias="Ville")
     cout_total_travaux_elligibles_ht : Optional[int] = Field(default=None, serialization_alias="cout euro HT")
     cout_total_travaux_elligibles_ttc : Optional[int] = Field(default=None, serialization_alias="cout TTC")
-    audit_date_jour : Optional[int] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Jour")
-    audit_date_mois : Optional[int] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Mois")
-    audit_date_annee : Optional[int] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Année")
+    audit_date_jour : Optional[str] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Jour")
+    audit_date_mois : Optional[str] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Mois")
+    audit_date_annee : Optional[str] = Field(default=None, serialization_alias="Date de réalisation de laudit énergétique Année")
 
     audit_id: Optional[str] = Field(default=None, serialization_alias="Identifiant")
     audit_professionnel_raison: Optional[str] = Field(default=None, serialization_alias="Raison sociale")
@@ -97,6 +97,7 @@ class Form_AttestationTravauxMPRA(BaseModel):
 
     derogation_3_designation: Optional[str] = Field(default=None, serialization_alias="Paroi opaque ou vitrée concernée Row 3")
     derogation_3_motif: Optional[str] = Field(default=None, serialization_alias="Motifs Row 3")
+
 
     def get_filling_dict(self):
         model = self.model_dump(by_alias=True)
