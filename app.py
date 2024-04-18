@@ -9,15 +9,16 @@ from PyPDFForm import PdfWrapper, FormWrapper
 from datetime import date
 from fillpdf import fillpdfs
 from io import StringIO, BytesIO
-
-
 from streamlit_url_fragment import get_fragment
-import urllib
-fragment = get_fragment()
-st.write(fragment)
-# if fragment:
-#     params = dict(urllib.parse.parse_qsl(fragment.removeprefix('#')))
-#     st.json(params)
+
+# pip3 install git+https://github.com/xgorse/streamlit-url-fragment.git@patch-1
+
+# current_value = get_fragment()
+
+
+# if current_value is None:
+#     st.stop()
+# st.write(f"Current value: {current_value!r}")
 
 
 form = Form_AttestationTravauxMPRA()
