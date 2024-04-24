@@ -7,18 +7,8 @@ from datetime import datetime
 from models import Form_AttestationTravauxMPRA
 from PyPDFForm import PdfWrapper, FormWrapper
 from datetime import date
-from fillpdf import fillpdfs
 from io import StringIO, BytesIO
 from streamlit_url_fragment import get_fragment
-
-# pip3 install git+https://github.com/xgorse/streamlit-url-fragment.git@patch-1
-
-# current_value = get_fragment()
-
-
-# if current_value is None:
-#     st.stop()
-# st.write(f"Current value: {current_value!r}")
 
 
 form = Form_AttestationTravauxMPRA()
