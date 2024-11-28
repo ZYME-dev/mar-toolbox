@@ -6,7 +6,7 @@ import encodings
 from datetime import datetime
 
 
-path = 'anah_mpra_attestation_travaux.pdf'
+path = 'anah_mpra_attestation_factures.pdf'
 path_out = 'out.pdf'
 # fields = fillpdfs.get_form_fields(path)
 # for f in fields: print(f)
@@ -95,7 +95,7 @@ if __name__ == "__main__" :
     create_grid()
     create_form()
 
-    print_widgets("anah_mpra_attestation_travaux.pdf")
+    print_widgets("anah_mpra_attestation_factures.pdf")
     print("---")
     print_widgets("anah_mprs_plan_financement.pdf")
 
