@@ -199,9 +199,8 @@ def fill_forms(
 
 if __name__ == "__main__":
     # read()
-    print_pdf_widgets("assets/templates/anah_mpra_attestation_cee.template.pdf")
-    form_fillers = get_form_fillers("assets/form.xlsx")
-    form_fillers = get_form_fillers("cccps/payan.xlsx")
-    fill_forms(form_fillers)
+    # print_pdf_widgets("assets/templates/anah_mpra_attestation_cee.template.pdf")
+    form_fillers = get_form_fillers("cccps/armand.xlsx")
+    fill_forms(form_fillers, template_base_dir="assets/templates/cccps")
     pass
     # print_widgets("assets/anah_mpra_plan_financement.template.pdf")
