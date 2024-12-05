@@ -1,14 +1,21 @@
-# MARlette ⭐
+import streamlit as st
 
-**MARlette ⭐** rempli tes formulaires ANAH pour le dépôt d'un dossier MPRA en 1 clic à partir d'un fichier de suivi excel.
+st.set_page_config(
+    page_title="Why MARlette ⭐ ?",
+    page_icon="⭐",
+    layout="centered",
+    initial_sidebar_state="expanded",
+    menu_items={
+        "Get Help": "https://www.extremelycoolapp.com/help",
+        "Report a bug": "https://www.extremelycoolapp.com/bug",
+        "About": "# This is a header. This is an *extremely* cool app!",
+    },
+)
 
+st.title("Why MARlette ⭐?")
 
-* un fichier excel de suivi pour tes dossiers MPRA (personnalisable)
-* des modèles de documents (personalisables / extensible)
-* **MARlette ⭐** 
-
-## Pouquoi **MARlette ⭐** ?
-
+st.markdown(
+"""
 Toi aussi tu te demandes pourquoi sur les 3/4/5 milliards d'euros 💰 du budget MaPrimeRénov si peu sont alloués à l'efficacité du processus de montage et dépôt des dossiers MPRA ?!
 
 Tu t'intérroge sur le TJM à 4 chiffres des consulants qui ont pondu cette plateform avec laquelle on galère tous (un peu facile ok-ok) ?
@@ -24,3 +31,5 @@ Avec **MARlette ⭐** je te montre ce qu'on peut faire avec un budget de 1000€
 > 
 > Avec **MARlette ⭐** tu gagnes facile 1h de paperasse par projet
 > 100kh/an = 62 equivalents temps plein 😱 = 2 480 000 €/an (en équivalent temps plein)
+"""
+)

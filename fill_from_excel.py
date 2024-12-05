@@ -11,6 +11,8 @@ from openpyxl import load_workbook
 from pydantic import BaseModel
 from itertools import islice
 from docxtpl import DocxTemplate
+from xlsx_image_loader import SheetImageLoader
+
 path = "anah_mpra_attestation_factures.pdf"
 path_out = "out.pdf"
 # fields = fillpdfs.get_form_fields(path)
@@ -68,7 +70,7 @@ def fill_pdf_template_pydpf(data: dict, template_filepath: Path):
             writer.write(output_stream)
 
 
-def read(form_path="assets/form.xlsx"):
+def read(form_path="assets/fiche.xlsx"):
     templates = []
     templates_dir = Path("assets/templates/")
     for f in templates_dir.iterdir():
@@ -117,21 +119,14 @@ def print_pdf_widgets(path):
         # print(f"{k}")
         pass
 
-    # filled = FormWrapper(path).fill(
-    #     {
-    #         "demandeur_nom_prenom": "DU PELOXU, Lionel",
-    #         "type_demandeur": 1,
-    #         "demandeur_fait_le": datetime.now().strftime("%d/%m/%Y")
-    #     },
-    #     flatten=False,  # optional
-    # )
 
-    # with open("output.pdf", "wb+") as output:
-    #     output.write(filled.read())
-
-
-def get_form_fillers(form_path="assets/form.xlsx") -> List[FormFiller]:
+def get_form_fillers(form_path="assets/fiche.xlsx") -> List[FormFiller]:
     wb = load_workbook(filename=form_path, data_only=True)
+    
+    ws =  wb["Suivi"]
+    image_loader = SheetImageLoader(ws)
+    image = image_loader.get('B41')
+
     form_fillers: List[FormFiller] = []
     for sheetname in wb.sheetnames:
         ws = wb[sheetname]
@@ -143,7 +138,7 @@ def get_form_fillers(form_path="assets/form.xlsx") -> List[FormFiller]:
             # the sheet represent a form filler
             template_filename = ws["B1"].value
             output_filename = ws["B2"].value
-            
+
             fields = OrderedDict()
             for i in range(4, ws.max_row + 1):
                 k = ws[f"B{i}"].value
@@ -164,14 +159,15 @@ def get_form_fillers(form_path="assets/form.xlsx") -> List[FormFiller]:
     return form_fillers
 
 
+
 def fill_forms(
     form_fillers: List[FormFiller],
     editable=False,
     template_base_dir: str = "assets/templates/",
     output_base_dir: str = "tmp/",
-):
+) -> List[Path]:
+    output_filepaths:List[Path] = []
     for form_filler in form_fillers:
-        
         template_filepath = str(
             Path(template_base_dir).joinpath(form_filler.template_filename)
         )
@@ -179,10 +175,19 @@ def fill_forms(
         output_filepath = str(
             Path(output_base_dir).joinpath(form_filler.output_filename)
         )
-        
+
         fields = dict(form_filler.fields.items())
-        
+
         if Path(form_filler.template_filename).suffix == ".pdf":
+            
+            # make sur to have a string value if the form expect a string
+            pdf_form_schema = PdfWrapper(template_filepath).schema
+            for k,v in fields.items():
+                if k in pdf_form_schema["properties"]:
+                    if pdf_form_schema["properties"][k]["type"] == "string":
+                        if v is not None:
+                            fields[k] = str(v)
+                        pass 
             if editable:
                 filled = FormWrapper(template_filepath).fill(fields, flatten=False)
             else:
@@ -193,14 +198,25 @@ def fill_forms(
             template = DocxTemplate(template_filepath)
             template.render(fields)
             template.save(output_filepath)
+        
+        output_filepaths.append(Path(output_filepath))
 
         pass
+    return output_filepaths
 
 
 if __name__ == "__main__":
     # read()
     # print_pdf_widgets("assets/templates/anah_mpra_attestation_cee.template.pdf")
-    form_fillers = get_form_fillers("cccps/armand.xlsx")
-    fill_forms(form_fillers, template_base_dir="assets/templates/cccps")
+    # form_fillers = get_form_fillers("cccps/payan.xlsx")
+    fiche = "assets/fiche.xlsx"
+    
+    fiche = r"P:\ENVIRONNEMENT - DD - GESTION DE L'ESPACE\Energie\PLATEFORME-reno\0-Accompagnements\1-Accompagnements PTRE\23-10-Chatillon-en-Diois_ARMAND_VAD\MPRA\1 - demande initiale\fiche_armand.xlsx"
+    fiche_path = Path(fiche)
+    
+    
+    form_fillers = get_form_fillers(fiche)
+    # form_fillers = [form_fillers[i] for i in (3,)]
+    fill_forms(form_fillers, template_base_dir="assets/templates/cccps", output_base_dir=str(fiche_path.parent.joinpath("pre/")))
     pass
     # print_widgets("assets/anah_mpra_plan_financement.template.pdf")
