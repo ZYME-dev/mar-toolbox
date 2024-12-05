@@ -13,101 +13,11 @@ from itertools import islice
 from docxtpl import DocxTemplate
 from xlsx_image_loader import SheetImageLoader
 
-path = "anah_mpra_attestation_factures.pdf"
-path_out = "out.pdf"
-# fields = fillpdfs.get_form_fields(path)
-# for f in fields: print(f)
-
-data_dict = {
-    "Nom Prénom": "Lionel du Peloux",
-    "Coût des travaux en HT TTC Row1": "1200.00 € HT \n 1220,00 € TTC",
-}
-
 
 class FormFiller(BaseModel):
     template_filename: str
     output_filename: str
     fields: OrderedDict
-
-
-def iter_excel_tablib(file: IO[bytes]) -> Iterator[dict[str, object]]:
-    yield from tablib.Dataset().load(file).dict
-
-
-def fill_pdf_template(data: dict, template_filepath: Path, editable=False):
-    if template_filepath.suffix == ".pdf":
-        # pdf_form_schema = PdfWrapper(str(template_filepath)).schema
-        # print(json.dumps(pdf_form_schema, indent=4, sort_keys=True))
-        if editable:
-            filled = FormWrapper(str(template_filepath)).fill(data, flatten=False)
-        else:
-            filled = PdfWrapper(str(template_filepath)).fill(data)
-        with open(
-            f"tmp/{template_filepath.name.replace("template","output")}", "wb+"
-        ) as output:
-            output.write(filled.read())
-
-
-def fill_pdf_template_pydpf(data: dict, template_filepath: Path):
-    if template_filepath.suffix == ".pdf":
-        # pdf_form_schema = PdfWrapper(str(template_filepath)).schema
-        # print(json.dumps(pdf_form_schema, indent=4, sort_keys=True))
-        reader = PdfReader(str(template_filepath))
-        writer = PdfWriter()
-
-        writer.append(reader)
-        data["auditeur_siret"] = 12354654654689
-        for page in writer.pages:
-            writer.update_page_form_field_values(
-                page,
-                data,
-                auto_regenerate=True,
-            )
-
-        with open(
-            f"tmp/{template_filepath.name.replace("template","output")}", "wb+"
-        ) as output_stream:
-            writer.write(output_stream)
-
-
-def read(form_path="assets/fiche.xlsx"):
-    templates = []
-    templates_dir = Path("assets/templates/")
-    for f in templates_dir.iterdir():
-        print(f)
-
-    workbook = python_calamine.CalamineWorkbook.from_path(form_path)
-
-    generators = []
-    for sheet_name in workbook.sheet_names:
-        print(sheet_name)
-        sheet = workbook.get_sheet_by_name(sheet_name)
-        data = sheet.to_python()
-        if "template" in data[0][0]:
-            template_filename = data[0][0]
-            template_filename_parts = template_filename.split(".")
-            extension = template_filename_parts[-1]
-
-            d = {}
-            for row in data[1:]:
-                k = row[1]
-                if k != "":
-                    try:
-                        if isinstance(row[2], datetime):
-                            v = row[2].strftime("%d/%m/%Y")
-                        else:
-                            v = int(row[2])
-                            if "plan_financement" in template_filename:
-                                v = "" if v == 0 else str(v).rjust(5)
-                            else:
-                                v = "" if v == 0 else str(v)
-                    except ValueError:
-                        v = row[2]
-                    d[k] = v
-            template_filepath = templates_dir.joinpath(template_filename)
-            fill_pdf_template(data=d, template_filepath=template_filepath)
-            # fill_pdf_template_pydpf(data=d, template_filepath=template_filepath)
-            pass
 
 
 def print_pdf_widgets(path):

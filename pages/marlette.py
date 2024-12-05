@@ -11,6 +11,7 @@ from fill_from_excel import fill_forms, get_form_fillers
 from pydantic import BaseModel
 from datetime import datetime
 
+st.set_page_config(page_icon="⭐")
 
 class FileContent(BaseModel):
     name: str
@@ -34,7 +35,7 @@ def create_tmp_dir(tmp_dir_name: str):
 @st.fragment
 def select_templates(tpl_files: List[FileContent]):
     tpl_files.clear()
-    b = st.toggle("Utiliser des modèles personnalisés", value=False)
+    b = st.toggle("Je veux utiliser des modèles de documents personnalisés", value=False)
     if b:
         uploaded_files = st.file_uploader(
             "Déposez les modèles de documents personnalisés au format `pdf` ou `docx` ci-dessous :",
@@ -85,7 +86,7 @@ def select_templates(tpl_files: List[FileContent]):
 @st.fragment
 def select_datasheet(ds_file: FileContent | None) -> FileContent | None:
     ds_file = None
-    b = st.toggle("Utiliser la fiche de données par défaut.", value=False)
+    b = st.toggle("Je veux utiliser la fiche de données par défaut", value=False)
     if not b:
         uploaded_file = st.file_uploader(
             "Déposer la fiche de données au format `.xlsx` ci-dessous :", type=["xlsx"]
@@ -113,24 +114,6 @@ def select_datasheet(ds_file: FileContent | None) -> FileContent | None:
 
 create_tmp_dir(TMP_DIR_NAME)
 
-pg = st.navigation([
-    st.Page("pages/why_marlette.py", title="Why MARlette ?"),
-    st.Page("pages/user_guide.py"),
-    st.Page("pages/dev_guide.py"),
-    ])
-
-
-st.set_page_config(
-    page_title="MARlette ⭐",
-    page_icon="⭐",
-    layout="centered",
-    initial_sidebar_state="expanded",
-    menu_items={
-        "Get Help": "https://www.extremelycoolapp.com/help",
-        "Report a bug": "https://www.extremelycoolapp.com/bug",
-        "About": "# This is a header. This is an *extremely* cool app!",
-    },
-)
 
 st.title("MARlette ⭐")
 st.caption("[Pour vos dossiers *MaPrimeRénov' Parcours Accompagné (MPRA)*]")
@@ -140,10 +123,10 @@ st.write(
 En 1 clic **MARlette** prépare vos formulaires ANAH à partir d'une simple fiche de suivi au format excel 🚀. 
 """
 )
-st.caption("Crédits : [Lionel du Peloux](https://www.linkedin.com/in/lionel-dupeloux/)")
+st.caption("Crédits : [Lionel](https://www.linkedin.com/in/lionel-dupeloux/)")
 
 st.header("1. Déposer vos fichiers")
-st.subheader("A. Sélectionnez vos modèles de documents", divider="gray")
+st.subheader("A. Sélectionnez vos modèles de documents  `pdf`  `docx`", divider="gray")
 
 st.caption(
     """Utilisez les modèles par défaut ou chargez vos propres modèles de documents, \
@@ -157,7 +140,7 @@ st.caption(
 
 select_templates(tpl_files)
 
-st.subheader("B. Sélectionnez votre fiche de données", divider="gray")
+st.subheader("B. Sélectionnez votre fiche de données `xlsx`", divider="gray")
 st.caption(
     """Uploadez votre fiche de données ou utilisez le modèle par défaut pour comprendre comment fonctionne **MARlette ⭐**."""
 )
@@ -165,7 +148,7 @@ st.caption(
 ds_file = select_datasheet(ds_file)
 
 
-st.header("2. Générer les documents")
+st.header("2. Générer vos documents")
 st.caption(
     """Quand vous êtes prêts, cliquez sur le bouton `Générer` : en quelques secondes **MARlette ⭐** rempli vos modèles de documents et vous les propose au téléchargement 🤩."""
 )
