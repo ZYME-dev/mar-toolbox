@@ -19,7 +19,7 @@ class FileContent(BaseModel):
 
 
 TMP_DIR_NAME = "tmp"
-TPL_DIR_PATH = "assets/templates/cccps"
+TPL_DIR_PATH = "assets/templates/blank"
 tpl_files: List[FileContent] = []
 ds_file: FileContent | None = None
 
