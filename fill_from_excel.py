@@ -1,16 +1,12 @@
 import json
 from pathlib import Path
-from typing import IO, Any, Dict, Iterator, List, OrderedDict
-from PyPDFForm import PdfWrapper, FormWrapper
-import encodings
-from datetime import datetime
-import python_calamine
-from pypdf import PdfReader, PdfWriter
-import tablib
+from typing import IO, Any, Dict, List, OrderedDict
+
+from docxtpl import DocxTemplate
 from openpyxl import load_workbook
 from pydantic import BaseModel
-from itertools import islice
-from docxtpl import DocxTemplate
+from PyPDFForm import FormWrapper, PdfWrapper
+
 from xlsx_image_loader import SheetImageLoader
 
 
@@ -32,10 +28,10 @@ def print_pdf_widgets(path):
 
 def get_form_fillers(form_path="assets/fiche.xlsx") -> List[FormFiller]:
     wb = load_workbook(filename=form_path, data_only=True)
-    
-    ws =  wb["Suivi"]
+
+    ws = wb["Suivi"]
     image_loader = SheetImageLoader(ws)
-    image = image_loader.get('B41')
+    image = image_loader.get("B41")
 
     form_fillers: List[FormFiller] = []
     for sheetname in wb.sheetnames:
@@ -69,14 +65,13 @@ def get_form_fillers(form_path="assets/fiche.xlsx") -> List[FormFiller]:
     return form_fillers
 
 
-
 def fill_forms(
     form_fillers: List[FormFiller],
     editable=False,
     template_base_dir: str = "assets/templates/",
     output_base_dir: str = "tmp/",
 ) -> List[Path]:
-    output_filepaths:List[Path] = []
+    output_filepaths: List[Path] = []
     for form_filler in form_fillers:
         template_filepath = str(
             Path(template_base_dir).joinpath(form_filler.template_filename)
@@ -89,15 +84,14 @@ def fill_forms(
         fields = dict(form_filler.fields.items())
 
         if Path(form_filler.template_filename).suffix == ".pdf":
-            
             # make sur to have a string value if the form expect a string
             pdf_form_schema = PdfWrapper(template_filepath).schema
-            for k,v in fields.items():
+            for k, v in fields.items():
                 if k in pdf_form_schema["properties"]:
                     if pdf_form_schema["properties"][k]["type"] == "string":
                         if v is not None:
                             fields[k] = str(v)
-                        pass 
+                        pass
             if editable:
                 filled = FormWrapper(template_filepath).fill(fields, flatten=False)
             else:
@@ -108,7 +102,7 @@ def fill_forms(
             template = DocxTemplate(template_filepath)
             template.render(fields)
             template.save(output_filepath)
-        
+
         output_filepaths.append(Path(output_filepath))
 
         pass
@@ -120,13 +114,16 @@ if __name__ == "__main__":
     # print_pdf_widgets("assets/templates/anah_mpra_attestation_cee.template.pdf")
     # form_fillers = get_form_fillers("cccps/payan.xlsx")
     fiche = "assets/fiche.xlsx"
-    
+
     fiche = r"P:\ENVIRONNEMENT - DD - GESTION DE L'ESPACE\Energie\PLATEFORME-reno\0-Accompagnements\1-Accompagnements PTRE\23-10-Chatillon-en-Diois_ARMAND_VAD\MPRA\1 - demande initiale\fiche_armand.xlsx"
     fiche_path = Path(fiche)
-    
-    
+
     form_fillers = get_form_fillers(fiche)
     # form_fillers = [form_fillers[i] for i in (3,)]
-    fill_forms(form_fillers, template_base_dir="assets/templates/cccps", output_base_dir=str(fiche_path.parent.joinpath("pre/")))
+    fill_forms(
+        form_fillers,
+        template_base_dir="assets/templates/cccps",
+        output_base_dir=str(fiche_path.parent.joinpath("pre/")),
+    )
     pass
     # print_widgets("assets/anah_mpra_plan_financement.template.pdf")
